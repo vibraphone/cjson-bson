@@ -33,12 +33,17 @@ int main(int argc, char* argv[])
     (std::istreambuf_iterator<char>(file)),
     (std::istreambuf_iterator<char>()));
 
+  // ++ 1 ++
   cJSON* node = cJSON_Parse(data.c_str());
   if (!node)
     return usage(argc, argv, "Could parse input file.", 5);
-  size_t sz;
+
+  // Ask for UUID strings to be serialized as binary UUIDs:
   cJSON_BSON_SetDetectUUIDs(1);
+
+  size_t sz; // will hold returned size of buf
   char* buf = cJSON_PrintBSON(node, &sz);
+  // -- 1 --
   cJSON_Delete(node);
   FILE* fid = fopen(argv[2], "wb");
   if (!fid)
