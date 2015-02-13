@@ -33,7 +33,6 @@ int main(int argc, char* argv[])
     (std::istreambuf_iterator<char>(file)),
     (std::istreambuf_iterator<char>()));
 
-  // ++ 1 ++
   cJSON* node = cJSON_Parse(data.c_str());
   if (!node)
     return usage(argc, argv, "Could parse input file.", 5);
@@ -43,7 +42,7 @@ int main(int argc, char* argv[])
 
   size_t sz; // will hold returned size of buf
   char* buf = cJSON_PrintBSON(node, &sz);
-  // -- 1 --
+
   cJSON_Delete(node);
   FILE* fid = fopen(argv[2], "wb");
   if (!fid)

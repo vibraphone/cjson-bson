@@ -38,13 +38,10 @@ int main(int argc, char* argv[])
   fread(&bson[0], bson_size, 1, fid);
   fclose(fid);
 
-  // ++ 1 ++
   cJSON* node = cJSON_ParseBSON(&bson[0], bson_size);
   if (!node)
     return usage(argc, argv, "Unable to parse input file.", 5);
-
   char* json = cJSON_Print(node);
-  // -- 1 --
   cJSON_Delete(node);
 
   fid = fopen(argv[2], "w");
