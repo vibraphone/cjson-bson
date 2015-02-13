@@ -2,6 +2,12 @@
 cJSON with BSON Support
 =======================
 
+.. image:: https://travis-ci.org/vibraphone/cjson-bson.svg
+   :alt: Travis-CI Build Status
+   :target: https://travis-ci.org/vibraphone/cjson-bson
+   :align: right
+
+
 This is a redistribution of cJSON_ with additional files
 that allow you to generate BSON_ from `cJSON*` records
 and parse BSON into `cJSON*` records.
