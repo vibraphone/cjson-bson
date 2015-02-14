@@ -8,9 +8,9 @@ cJSON_ with BSON_ Support
    :align: right
 
 
-This is a redistribution of cJSON_ with additional files
-that allow you to generate BSON_ from ``cJSON*`` records
-and parse BSON_ into ``cJSON*`` records.
+This is a redistribution of cJSON with additional files
+that allow you to generate BSON from ``cJSON*`` records
+and parse BSON into ``cJSON*`` records.
 
 
 -----
@@ -22,12 +22,15 @@ its BSON serialization like so:
 
 .. code:: c
 
+    #include <cJSON.h>
+    #include <cJSON_BSON.h>
+
     cJSON* node = cJSON_Parse(data);
-    if (!node)
-      return usage(argc, argv, "Could parse input file.");
 
     size_t sz; // Will hold returned size of buf
     char* buf = cJSON_PrintBSON(node, &sz);
+
+    // Now write the buffer to a file or socket...
 
 You can also parse data from a BSON byte-stream into a
 cJSON record like so:
@@ -35,8 +38,7 @@ cJSON record like so:
 .. code:: c
 
     size_t bson_size;
-    char* bson = malloc(bson_size);
-    fread(bson, bson_size, 1, fid);
+    char* bson; // pointer to bson_size bytes of BSON data
 
     cJSON* node = cJSON_ParseBSON(bson, bson_size);
     free(bson);
@@ -75,7 +77,25 @@ The blobs themselves are just stored as non-null-terminated
 data in the valuestring member and the *subtype* of the the
 binary data is stored in valuestring.
 The ``cJSON_BSON.h`` header provides some additional
-item type values for binary blobs of data.
+item type values for binary blobs of data so that you
+can determine when ``node->valuestring`` is a proper UTF-8
+string or a binary blob.
+
+-----------------------------
+Building and Running Examples
+-----------------------------
+
+This repository comes with two simple examples that convert
+JSON to BSON and back.
+
+.. code:: sh
+
+    % mkdir build; cd build
+    % cmake ..
+    % make
+    % ./json2bson /path/to/file.json /path/to/output.bson
+    % ./bson2json /path/to/file.bson /path/to/output.json
+
 
 .. _cJSON: https://sourceforge.net/projects/cjson/
 .. _BSON: http://bsonspec.org/
