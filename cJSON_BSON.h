@@ -3,6 +3,7 @@
 
 #include "cJSON.h"
 #include <stddef.h>
+#include <stdint.h>
 
 /* Extra cJSON tags for extended BSON types.
  *
