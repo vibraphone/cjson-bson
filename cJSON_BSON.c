@@ -123,13 +123,15 @@ int cJSON_BSON_WillDetectUUIDs()
  */
 int bson_is_string_uuid(const char* val)
 {
+  int i;
+
   if (!val || strlen(val) != 36)
     return 0;
 
   if (val[8] != '-' || val[13] != '-' || val[18] != '-' || val[23] != '-')
     return 0;
 
-  for (int i = 0; i < 4; ++i)
+  for (i = 0; i < 4; ++i)
     if (
       !isxdigit(val[ 0 + i]) ||
       !isxdigit(val[ 4 + i]) ||
@@ -160,7 +162,8 @@ static void decode_hex_string(const char* in, size_t len, uint8_t* out)
 static void encode_hex_string(const uint8_t* in, size_t len, char* out)
 {
   static const char convert[16] = "0123456789abcdef";
-  for (size_t i = 0; i < len; ++i)
+  size_t i;
+  for (i = 0; i < len; ++i)
     {
     *(out++) = convert[((*in) & 0xf0) >> 4];
     *(out++) = convert[(*(in++)) & 0x0f];
@@ -207,7 +210,8 @@ size_t bson_get_doc_size(cJSON* item)
 {
   /* 5 = 4 byte length + item size + 1-byte null terminator */
   size_t result = 5;
-  for (cJSON* kid = item->child; kid; kid = kid->next)
+  cJSON* kid;
+  for (kid = item->child; kid; kid = kid->next)
     result += bson_get_size(kid);
   return result;
 }
@@ -255,12 +259,13 @@ size_t bson_get_array_size(cJSON* item)
    */
   size_t numentries = 0;
   size_t valsize = 5; /* document size + terminator = 5 bytes */
+  cJSON* kid;
   /* count the number of child items in the array and
    * calculate the size of the items' values without looking
    * at their item->string values. This is different than
    * dictionaries which use item->string as a key.
    */
-  for (cJSON* kid = item; kid; kid = kid->next, ++numentries)
+  for (kid = item; kid; kid = kid->next, ++numentries)
     valsize += bson_get_array_item_size(kid);
   /* calculate the number of digits in all the keys.
    * The  first  10 (or fewer) have 1 digit (0-9).
@@ -287,7 +292,8 @@ size_t bson_get_object_size(cJSON* item)
 {
   size_t numentries = 0;
   size_t valsize = 4; /* 4 bytes for int32 record size */
-  for (cJSON* kid = item; kid; kid = kid->next, ++numentries)
+  cJSON* kid;
+  for (kid = item; kid; kid = kid->next, ++numentries)
     {
     /* TODO: Generate error when kid->string is NULL */
     valsize += bson_get_size(kid);
@@ -336,13 +342,14 @@ size_t bson_get_size(cJSON* item)
  */
 char* bson_doc_value(cJSON* item, char* buf, size_t bufsize, ptrdiff_t* idxName)
 {
+  char* loc = buf;
+  cJSON* cur;
   if (bufsize < 5)
     return NULL;
 
-  char* loc = buf;
   /* set aside space for the byte count */
   loc += 4;
-  for (cJSON* cur = item; cur; cur = cur->next)
+  for (cur = item; cur; cur = cur->next)
     {
     size_t delta = loc - buf + 1;
     if (delta > bufsize)

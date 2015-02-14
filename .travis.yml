@@ -20,5 +20,5 @@ install:
 
 script:
  - mkdir ~/cjson-build && cd ~/cjson-build
- - cmake -G Ninja "-DSITE:STRING=travis-ci.org" "-DBUILDNAME:STRING=${TRAVIS_OS_NAME}-${CC}-Job.${TRAVIS_JOB_NUMBER}" -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo -DBUILD_SHARED_LIBS:BOOL=ON "-DCMAKE_INSTALL_PREFIX=${HOME}/cjson-install" ${TRAVIS_BUILD_DIR}
+ - cmake -G Ninja "-DSITE:STRING=travis-ci.org" "-DBUILDNAME:STRING=${TRAVIS_OS_NAME}-${CC}-Job.${TRAVIS_JOB_NUMBER}" -DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo -DBUILD_SHARED_LIBS:BOOL=ON "-DCMAKE_INSTALL_PREFIX=${HOME}/cjson-install" "-DCMAKE_C_FLAGS:STRING=-Wall -Wextra" ${TRAVIS_BUILD_DIR}
  - ninja -j2 install
