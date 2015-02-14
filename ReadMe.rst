@@ -12,7 +12,6 @@ This is a redistribution of cJSON with additional files
 that allow you to generate BSON from ``cJSON*`` records
 and parse BSON into ``cJSON*`` records.
 
-
 -----
 Usage
 -----
@@ -82,7 +81,7 @@ can determine when ``node->valuestring`` is a proper UTF-8
 string or a binary blob.
 
 -----------------------------
-Building and Running Examples
+Building and running examples
 -----------------------------
 
 This repository comes with two simple examples that convert
@@ -90,12 +89,20 @@ JSON to BSON and back.
 
 .. code:: sh
 
-    % mkdir build; cd build
+    % git clone https://github.com/vibraphone/cjson-bson.git
+    % mkdir cjson-bson/build; cd cjson-bson/build
+
     % cmake ..
     % make
+
     % ./json2bson /path/to/file.json /path/to/output.bson
     % ./bson2json /path/to/file.bson /path/to/output.json
 
+The BSON files created with these utilities can be read with libbson_,
+which is the only validation of the generated BSON so far.
+The `bson2json` utility has been able to parse files created by
+other utilities as well.
 
 .. _cJSON: https://sourceforge.net/projects/cjson/
 .. _BSON: http://bsonspec.org/
+.. _libbson: https://github.com/mongodb/libbson
