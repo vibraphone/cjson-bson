@@ -23,16 +23,16 @@
 #define cJSON_UUID   17 /* subtype is implicit, data stored in item->valuestring */
 
 /* BSON tags we support */
-#define cBSON_Float   0x01
-#define cBSON_String  0x02
-#define cBSON_Array   0x04
-#define cBSON_Binary  0x05
-#define cBSON_Bool    0x08
-#define cBSON_NULL    0x0a
-#define cBSON_Int     0x12
+#define cBSON_Float      0x01
+#define cBSON_String     0x02
+#define cBSON_Document   0x03
+#define cBSON_Array      0x04
+#define cBSON_Binary     0x05
+#define cBSON_Bool       0x08
+#define cBSON_NULL       0x0a
+#define cBSON_Int        0x12
 
 /* BSON tags we don't support */
-#define cBSON_Document   0x03
 #define cBSON_Undefined  0x06 /* deprecated */
 #define cBSON_ObjectId   0x07
 #define cBSON_UTC_Time   0x09
@@ -47,15 +47,15 @@
 #define cBSON_Max_Key    0x7f
 
 /* BSON binary data subtypes we support */
-#define cBSON_UUID     0x04
+#define cBSON_UUID       0x04
 
 /* BSON binary data subtypes we don't support */
-#define cBSON_Generic  0x00
-#define cBSON_Function 0x01
-#define cBSON_Old      0x02 /* deprecated? */
-#define cBSON_OldUUID  0x03 /* deprecated */
-#define cBSON_MD5      0x05
-#define cBSON_User     0x80
+#define cBSON_Generic    0x00
+#define cBSON_Function   0x01
+#define cBSON_Old        0x02 /* deprecated? */
+#define cBSON_OldUUID    0x03 /* deprecated */
+#define cBSON_MD5        0x05
+#define cBSON_User       0x80
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,7 +63,7 @@ extern "C" {
 
 char* cJSON_PrintBSON(cJSON *item, size_t* bson_size_out);
 void cJSON_DeleteBSON(char* bson);
-cJSON* cJSON_ParseBSON(const char* bson, size_t bson_size);
+cJSON* cJSON_ParseBSON(const char* bson, size_t bson_size, int doc_type);
 
 void cJSON_BSON_SetDetectUUIDs(int yes);
 int cJSON_BSON_WillDetectUUIDs();
@@ -81,7 +81,7 @@ size_t bson_get_array_size(cJSON* item);
 size_t bson_get_object_size(cJSON* item);
 size_t bson_get_size(cJSON* item);
 
-cJSON* bson_parse_doc(const char* bson, size_t bson_size);
+cJSON* bson_parse_doc(const char* bson, size_t bson_size, int doc_type);
 
 #ifdef __cplusplus
 } // extern "C"

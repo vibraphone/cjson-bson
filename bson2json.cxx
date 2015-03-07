@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
   fread(&bson[0], bson_size, 1, fid);
   fclose(fid);
 
-  cJSON* node = cJSON_ParseBSON(&bson[0], bson_size);
+  cJSON* node = cJSON_ParseBSON(&bson[0], bson_size, cJSON_NULL);
   if (!node)
     return usage(argc, argv, "Unable to parse input file.", 5);
   char* json = cJSON_Print(node);

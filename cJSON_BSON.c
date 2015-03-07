@@ -81,9 +81,20 @@ static char* cJSON_strdup(const char* str, size_t* len, int nullOK)
   */
 char* cJSON_PrintBSON(cJSON *item, size_t* bufSizeOut)
 {
-  *bufSizeOut = bson_get_doc_size(item);
-  char* bsonVal = (char*) cJSON_malloc(*bufSizeOut);
-  bson_doc_value(item->child, bsonVal, *bufSizeOut, NULL);
+  char* bsonVal;
+  if (item->type != cJSON_Array)
+    {
+    *bufSizeOut = bson_get_doc_size(item);
+    bsonVal = (char*) cJSON_malloc(*bufSizeOut);
+    bson_doc_value(item->child, bsonVal, *bufSizeOut, NULL);
+    }
+  else
+    {
+    *bufSizeOut = bson_get_array_size(item) - 8;
+    bsonVal = (char*) cJSON_malloc(*bufSizeOut);
+    ptrdiff_t idx = 0;
+    bson_doc_value(item->child, bsonVal, *bufSizeOut, &idx);
+    }
   return bsonVal;
 }
 
@@ -482,7 +493,7 @@ size_t bson_item_value(cJSON* item, char* buf, size_t bufsize, ptrdiff_t* idxNam
     break;
   case cJSON_Object:
       {
-      /*no gen name*/  *(loc++) = cBSON_Array;
+      /*no gen name*/  *(loc++) = cBSON_Document;
       loc += bson_item_name(item, loc, bufsize - 1, idxName);
       loc = bson_doc_value(item->child, loc, bufsize - (loc  - buf) - 1, NULL);
       }
@@ -570,7 +581,7 @@ size_t bson_parse_string(const char* bson, size_t remaining, cJSON*** prev)
 }
 
 
-size_t bson_parse_document(const char* bson, size_t remaining, cJSON*** prev)
+size_t bson_parse_document(const char* bson, size_t remaining, cJSON*** prev, int tag)
 {
   (void) remaining;
   size_t len;
@@ -578,7 +589,8 @@ size_t bson_parse_document(const char* bson, size_t remaining, cJSON*** prev)
   const char* loc = bson + len;
   // peek at the size:
   int32_t dlen = *(const int32_t*)loc;
-  cJSON* node = bson_parse_doc(loc, (size_t)dlen);
+  cJSON* node = bson_parse_doc(
+    loc, (size_t)dlen, tag == cBSON_Array ? cJSON_Array : cJSON_Object);
   if (node)
     {
     node->string = key;
@@ -722,9 +734,12 @@ size_t bson_parse_code_ws(const char* bson, size_t remaining, cJSON*** prev)
   return 0;
 }
 
-cJSON* bson_parse_doc(const char* bson, size_t bson_size)
+cJSON* bson_parse_doc(const char* bson, size_t bson_size, int doc_type)
 {
-  cJSON* result = cJSON_CreateObject(); /* TODO: detect array vs object */
+  cJSON* result =
+    (doc_type != cJSON_Array ?
+     cJSON_CreateObject() :
+     cJSON_CreateArray());
   cJSON** next_child = &result->child;
   cJSON* prev = NULL;
   const char* loc = bson;
@@ -742,7 +757,7 @@ cJSON* bson_parse_doc(const char* bson, size_t bson_size)
     switch (itype)
       {
     case 0: /* null terminator marking end of document */
-                           if (allIndicesAreInts)
+                           if (doc_type < cJSON_Array && allIndicesAreInts)
                              result->type = cJSON_Array;
                            return result;
     case cBSON_Float:
@@ -753,7 +768,7 @@ cJSON* bson_parse_doc(const char* bson, size_t bson_size)
                            loc += bson_parse_string(loc, remaining, &next_child); break;
     case cBSON_Document:
     case cBSON_Array:
-                           loc += bson_parse_document(loc, remaining, &next_child); break;
+                           loc += bson_parse_document(loc, remaining, &next_child, itype); break;
     case cBSON_Binary:
                            loc += bson_parse_blob(loc, remaining, &next_child); break;
     case cBSON_ObjectId:
@@ -782,10 +797,12 @@ cJSON* bson_parse_doc(const char* bson, size_t bson_size)
                            return NULL;
       }
     remaining = bson_size - (loc - bson);
-    /* See if the node we just added has an integer index
-     * (used to decide whether this should be an object or
-     * an array). */
-    if (allIndicesAreInts)
+    /* If the document type is unspecified (doc_type == cJSON_NULL),
+     * then we should be checking to see whether it can be an array
+     * or (because the keys are not increasing integers) must be
+     * an object.
+     */
+    if (doc_type < cJSON_Array && allIndicesAreInts)
       {
       if (!prev)
         prev = result->child;
@@ -806,12 +823,30 @@ cJSON* bson_parse_doc(const char* bson, size_t bson_size)
         }
       }
     }
-  if (allIndicesAreInts)
+  /* If we were not told the document type, set it: */
+  if (doc_type < cJSON_Array && allIndicesAreInts)
     result->type = cJSON_Array;
   return result;
 }
 
-cJSON* cJSON_ParseBSON(const char* bson, size_t bson_size)
+/**\brief Parse a BSON buffer into a tree of cJSON records.
+  *
+  * The first two arguments are the buffer and size.
+  * The third argument allows you to specify a preference
+  * for the top-level object type.
+  * The following values are accepted:
+  *
+  * + cJSON_Array, indicating that an array should contain
+  *   all the top-level entries (even if their key values
+  *   are not all integers);
+  * + cJSON_Object, indicating that a dictionary should
+  *   contain all the top-level entries (even if their
+  *   key values are all integers); or
+  * + cJSON_NULL, indicating that you have no preference
+  *   and the key values should be used to decide whether
+  *   to create a cJSON_Array or cJSON_Object.
+  */
+cJSON* cJSON_ParseBSON(const char* bson, size_t bson_size, int doc_type)
 {
-  return bson_parse_doc(bson, bson_size);
+  return bson_parse_doc(bson, bson_size, doc_type);
 }
