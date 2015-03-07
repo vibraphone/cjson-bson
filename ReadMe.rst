@@ -39,7 +39,8 @@ cJSON record like so:
     size_t bson_size;
     char* bson; // pointer to bson_size bytes of BSON data
 
-    cJSON* node = cJSON_ParseBSON(bson, bson_size);
+    int toplevel_node_type = cJSON_NULL; // or cJSON_Object or cJSON_Array to force type.
+    cJSON* node = cJSON_ParseBSON(bson, bson_size, toplevel_node_type);
     free(bson);
     // Now you can traverse node or print, like so:
     char* json = cJSON_Print(node);

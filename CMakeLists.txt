@@ -31,3 +31,7 @@ install(
   EXPORT cJSON
   DESTINATION lib/cmake/cJSON
 )
+
+enable_testing()
+include(CTest)
+add_subdirectory(test)
