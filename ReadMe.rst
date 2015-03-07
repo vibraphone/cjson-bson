@@ -29,7 +29,9 @@ its BSON serialization like so:
     size_t sz; // Will hold returned size of buf
     char* buf = cJSON_PrintBSON(node, &sz);
 
-    // Now write the buffer to a file or socket...
+    // Now write the buffer contents to a file or socket...
+    // and free the allocated buffer when you're done:
+    cJSON_DeleteBSON(buf);
 
 You can also parse data from a BSON byte-stream into a
 cJSON record like so:
@@ -42,8 +44,11 @@ cJSON record like so:
     int toplevel_node_type = cJSON_NULL; // or cJSON_Object or cJSON_Array to force type.
     cJSON* node = cJSON_ParseBSON(bson, bson_size, toplevel_node_type);
     free(bson);
-    // Now you can traverse node or print, like so:
+
+    // Now you can traverse the node or print it, like so:
     char* json = cJSON_Print(node);
+    // Free the top-level node when you're done:
+    cJSON_Delete(node);
 
 -----------------
 Optional features
