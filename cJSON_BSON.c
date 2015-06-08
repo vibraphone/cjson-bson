@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <inttypes.h>
 #include <float.h>
 #include <limits.h>
 #include <ctype.h>
@@ -390,7 +391,7 @@ size_t bson_item_name(cJSON* item, char* buf, size_t bufsize, ptrdiff_t* idxName
   size_t result = 0;
   if (idxName)
     {
-    result = snprintf(buf, bufsize, "%lu", *idxName);
+    result = snprintf(buf, bufsize, "%" PRIuPTR, *idxName);
     if (result > bufsize)
       result = bufsize - 1; /* Prevent overruns */
     (*idxName) ++; /* increment the index for the next item. */
